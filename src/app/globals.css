@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  /* SF Pro on Apple devices; good fallbacks elsewhere */
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "SF Pro Text", "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: #f5f5f7; /* Apple-ish light gray */
+  color: #111827;      /* zinc-900-ish */
+}
+
+::selection {
+  background: rgba(0, 0, 0, 0.12);
+}
