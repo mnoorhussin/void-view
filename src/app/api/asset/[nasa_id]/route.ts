@@ -13,8 +13,8 @@ function normalizeUrls(items: AssetItem[]): string[] {
     .map((it) => (typeof it === "string" ? it : it?.href))
     .filter((x): x is string => typeof x === "string" && x.length > 0);
 }
-
-function pickBest(urls: string[]) {
+type Kind = "jpg" | "tiff" | "none" | "thumb-fallback";
+function pickBest(urls: string[]): { best: string | null; kind: Kind } {
   const isJpgPng = (u: string) => /\.(jpe?g|png)$/i.test(u);
   const isTiff = (u: string) => /\.(tif|tiff)$/i.test(u);
 
@@ -29,12 +29,12 @@ function pickBest(urls: string[]) {
   };
 
   const jpgs = urls.filter(isJpgPng);
-  if (jpgs.length) return { best: pickFrom(jpgs), kind: "jpg" as const };
+  if (jpgs.length) return { best: pickFrom(jpgs), kind: "jpg" };
 
   const tiffs = urls.filter(isTiff);
-  if (tiffs.length) return { best: pickFrom(tiffs), kind: "tiff" as const };
+  if (tiffs.length) return { best: pickFrom(tiffs), kind: "tiff" };
 
-  return { best: null, kind: "none" as const };
+  return { best: null, kind: "none" };
 }
 
 async function fallbackThumbFromSearch(nasa_id: string): Promise<string | null> {

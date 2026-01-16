@@ -4,7 +4,7 @@ import sharp from "sharp";
 import { Readable } from "node:stream";
 
 export const runtime = "nodejs";
-export const revalidate = 60 * 60 * 24 * 7; // 7 days
+export const revalidate = 604800; // 7 days
 
 const LIMIT_INPUT_PIXELS = 268402689; // ~16384*16384 safety cap
 
