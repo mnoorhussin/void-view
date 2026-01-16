@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function SiteFooter() {
   return (
     <footer className="mt-10 border-t border-black/5">
@@ -9,16 +11,20 @@ export default function SiteFooter() {
               Curated space imagery + fit-to-device wallpapers.
             </p>
           </div>
+
+          <div>
+            <p className="font-semibold text-zinc-900">Legal</p>
+            <div className="mt-2 flex flex-col gap-2">
+              <Link className="hover:text-zinc-900" href="/privacy">Privacy Policy</Link>
+              <Link className="hover:text-zinc-900" href="/terms">Terms</Link>
+              <Link className="hover:text-zinc-900" href="/contact">Contact</Link>
+            </div>
+          </div>
+
           <div>
             <p className="font-semibold text-zinc-900">Credits</p>
             <p className="mt-2 leading-relaxed">
               Not affiliated with NASA. Credits belong to their respective owners.
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-zinc-900">Monetization</p>
-            <p className="mt-2 leading-relaxed">
-              Add Privacy Policy / Terms before AdSense.
             </p>
           </div>
         </div>

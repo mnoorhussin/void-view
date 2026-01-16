@@ -1,0 +1,208 @@
+import Link from "next/link";
+import Image from "next/image";
+import { CATEGORIES, categoryBySlug } from "@/lib/categories";
+import { getFeed } from "@/lib/nasa";
+
+function pageRange(current: number, totalPages: number | null) {
+  // Show a small window like: 1 … 4 5 [6] 7 8 … N
+  const windowSize = 2;
+  const start = Math.max(1, current - windowSize);
+  const end = totalPages ? Math.min(totalPages, current + windowSize) : current + windowSize;
+
+  const pages: number[] = [];
+  for (let p = start; p <= end; p++) pages.push(p);
+
+  return {
+    pages,
+    showFirst: start > 1,
+    showLast: totalPages ? end < totalPages : true,
+    firstPage: 1,
+    lastPage: totalPages,
+  };
+}
+
+export default async function ExplorePagedView({
+  activeSlug,
+  page,
+}: {
+  activeSlug: string;
+  page: number;
+}) {
+  const active = categoryBySlug(activeSlug);
+  const data = await getFeed(active.slug, page);
+
+  const items = data?.items ?? [];
+  const hero = items[0];
+
+  if (!hero) {
+    return (
+      <div className="rounded-3xl bg-white border border-black/5 p-8">
+        <p className="text-zinc-600">No images right now.</p>
+      </div>
+    );
+  }
+  const perPage = data?.perPage ?? 25;
+
+// total items includes hero, so grid should be (perPage - 1)
+const gridItems = items.slice(1, perPage);
+
+  const totalPages = data?.totalPages ?? null;
+
+  // Canonical page hrefs:
+  // - featured page 1 => "/"
+  // - featured page 2+ => "/c/featured/2"
+  // - other categories => "/c/<cat>/<page>"
+  const hrefForPage = (p: number) => {
+    if (active.slug === "featured") return p === 1 ? "/" : `/c/featured/${p}`;
+    return `/c/${active.slug}/${p}`;
+  };
+
+  const canPrev = page > 1;
+  const canNext = totalPages ? page < totalPages : items.length === (data?.perPage ?? 25);
+
+  const prevHref = canPrev ? hrefForPage(page - 1) : null;
+  const nextHref = canNext ? hrefForPage(page + 1) : null;
+
+  const pr = pageRange(page, totalPages);
+
+  return (
+    <div className="space-y-8">
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {CATEGORIES.map((c) => {
+          const isActive = c.slug === active.slug;
+
+          // Featured goes to "/", other categories to "/c/<slug>/1"
+          const href = c.slug === "featured" ? "/" : `/c/${c.slug}/1`;
+
+          return (
+            <Link
+              key={c.slug}
+              href={href}
+              className={
+                isActive
+                  ? "rounded-full bg-black px-4 py-2 text-sm font-medium text-white"
+                  : "rounded-full bg-white px-4 py-2 text-sm font-medium text-zinc-800 border border-black/10 hover:bg-zinc-50"
+              }
+            >
+              {c.label}
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Hero */}
+      <section className="relative overflow-hidden rounded-3xl bg-white border border-black/5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+        <div className="relative h-[52vh] w-full">
+          <Image src={hero.thumb} alt={hero.title} fill priority className="object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        </div>
+
+        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10 text-white">
+          <p className="text-xs uppercase tracking-[0.18em] text-white/80">
+            {active.label} — Page {page}
+          </p>
+          <h1 className="mt-2 max-w-4xl text-2xl font-semibold md:text-4xl">{hero.title}</h1>
+
+          <div className="mt-5 flex gap-3">
+            <Link
+              className="rounded-full bg-white/90 px-5 py-2.5 text-sm font-medium text-black hover:bg-white"
+              href={`/image/${hero.nasa_id}`}
+            >
+              View details
+            </Link>
+            <Link
+              className="rounded-full border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-medium text-white hover:bg-white/15"
+              href={`/generate/${hero.nasa_id}`}
+            >
+              Fit to device
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid */}
+      <section>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+          {gridItems.map((it) => (
+            <Link
+              key={it.nasa_id}
+              href={`/image/${it.nasa_id}`}
+              className="rounded-3xl bg-white border border-black/5 overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] transition"
+            >
+              <div className="relative aspect-[4/3] w-full">
+                <Image src={it.thumb} alt={it.title} fill className="object-cover" />
+              </div>
+              <div className="p-4">
+                <p className="text-sm font-medium text-zinc-900 line-clamp-2">{it.title}</p>
+                <p className="mt-1 text-xs text-zinc-500">Open</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Pagination (now enabled for Featured too) */}
+      <nav className="flex items-center justify-between gap-4 pt-2">
+        <div className="min-w-[80px]">
+          {prevHref ? (
+            <Link className="text-sm text-zinc-700 hover:text-zinc-900" href={prevHref}>
+              ← Prev
+            </Link>
+          ) : null}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {pr.showFirst ? (
+            <>
+              <Link
+                className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-sm hover:bg-zinc-50"
+                href={hrefForPage(1)}
+              >
+                1
+              </Link>
+              <span className="text-zinc-400">…</span>
+            </>
+          ) : null}
+
+          {pr.pages.map((p) => {
+            const isActive = p === page;
+            return (
+              <Link
+                key={p}
+                href={hrefForPage(p)}
+                className={
+                  isActive
+                    ? "rounded-full bg-black px-3 py-1.5 text-sm text-white"
+                    : "rounded-full border border-black/10 bg-white px-3 py-1.5 text-sm hover:bg-zinc-50"
+                }
+              >
+                {p}
+              </Link>
+            );
+          })}
+
+          {pr.showLast && pr.lastPage ? (
+            <>
+              <span className="text-zinc-400">…</span>
+              <Link
+                className="rounded-full border border-black/10 bg-white px-3 py-1.5 text-sm hover:bg-zinc-50"
+                href={hrefForPage(pr.lastPage)}
+              >
+                {pr.lastPage}
+              </Link>
+            </>
+          ) : null}
+        </div>
+
+        <div className="min-w-[80px] text-right">
+          {nextHref ? (
+            <Link className="text-sm text-zinc-700 hover:text-zinc-900" href={nextHref}>
+              Next →
+            </Link>
+          ) : null}
+        </div>
+      </nav>
+    </div>
+  );
+}

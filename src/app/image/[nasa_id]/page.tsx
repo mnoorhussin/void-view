@@ -60,6 +60,9 @@ export default async function ImagePage({ params }: { params: Promise<{ nasa_id:
             <Link className={btnClass(true)} href={`/generate/${item.nasa_id}`}>
               Fit to device
             </Link>
+            <Link className={btnClass(true)} href={`/print/${item.nasa_id}`}>
+              Print / Poster
+            </Link>
             <a className={btnClass(true)} href={item.thumb} target="_blank" rel="noreferrer">
               Open image
             </a>

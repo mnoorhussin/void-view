@@ -1,36 +1,168 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+````md
+# VoidView — Space Image Gallery + Wallpaper + Print Generator
 
-## Getting Started
+VoidView is a fast, minimal space-image gallery powered by NASA’s public image library, featuring:
 
-First, run the development server:
+- **Device-fit wallpapers** (blur fill / crop / fit)
+- **Print / poster exports** (print sizes, DPI, no-crop mode)
+- **SEO-friendly category browsing** with clean, paginated URLs
+
+Live: **https://voidview.space**
+
+---
+
+## What makes VoidView unique
+
+Most “space wallpaper” sites are just image dumps. VoidView adds real utility:
+
+- A **Fit to Device** generator for wallpapers
+- A **Print / Poster mode** that exports _print-ready_ files
+- A **Print Quality Check** that estimates whether a chosen print size will look sharp
+
+---
+
+## Features
+
+### Explore (SEO-Friendly)
+
+- **Clean category URLs**: `/c/nebulae/1`, `/c/galaxies/2`, etc.
+- **24 images per page** (stable pagination; crawlable)
+- **Featured** behaves like a category:
+  - `/` = Featured page 1 (canonical)
+  - `/c/featured/2+` = Featured pages
+
+### Image Pages
+
+- Dedicated **image detail page** per `nasa_id`
+- Title + description (when available)
+- Actions:
+  - **Fit to Device**
+  - **Print / Poster**
+
+### Fit to Device (Wallpaper Generator)
+
+- Presets for phone/desktop/ultrawide
+- Modes:
+  - **Blur fill** (recommended)
+  - **Crop / cover**
+  - **Fit / contain**
+- Generates a downloadable JPG via server-side rendering (`sharp`)
+- Download button can be hidden until preview is generated (UX-friendly)
+
+### Print / Poster Mode (Monetization-ready)
+
+- Export to common print sizes (e.g. 12×18, 18×24, 24×36)
+- DPI choices (200 / 300)
+- **No-crop print mode** (image fits inside poster size, adds white margins when needed)
+- Server-side print rendering with `sharp`
+- **Print Quality Check**
+  - Reads source pixel dimensions
+  - Estimates effective DPI / upscaling requirement
+  - Warns when output may be soft at the chosen size
+
+### Trust & Compliance Pages
+
+- `/privacy` (Privacy Policy)
+- `/terms` (Terms)
+- `/contact` (Contact)
+- `/about` (About)
+- Simple, non-invasive cookie consent banner (starter)
+
+### SEO Infrastructure
+
+- `robots.txt` via App Router metadata
+- `sitemap.xml` includes `/c/<slug>/<page>` for first N pages per category
+- Canonical metadata per category page (`/c/[cat]/[page]`)
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js (App Router) + TypeScript
+- **Styling:** Tailwind CSS (clean, Apple-like UI)
+- **Images:** `next/image`
+- **Image Processing:** `sharp` (wallpaper + print generation)
+- **Data Source:** NASA Images & Video Library API
+  - Search: `https://images-api.nasa.gov/search`
+  - Assets: `https://images-api.nasa.gov/asset/:nasa_id`
+- **Deployment:** Vercel
+
+---
+
+## Important Routes
+
+### Category browsing
+
+- `/` (Featured page 1)
+- `/c/:cat/:page` (paginated categories)
+  - Example: `/c/nebulae/2`
+
+### APIs
+
+- `GET /api/feed?cat=nebulae&page=1` — category feed (24 items)
+- `GET /api/wallpaper?...` / `POST /api/wallpaper` — wallpaper generator
+- `GET /api/print?...` / `POST /api/print` — print/poster generator
+- `GET /api/print-meta?nasa_id=...` — source dimension lookup for print quality check
+
+---
+
+## Local Development
+
+### Install
+
+```bash
+npm install
+```
+````
+
+### Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- http://localhost:3000
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Create `.env.local`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```env
+# NASA Images API does not require a key. Keep if you later add APOD or other NASA endpoints.
+NASA_API_KEY=
+NEXT_PUBLIC_SITE_URL=
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+> Tip: In development, you usually don’t need `NEXT_PUBLIC_SITE_URL`. On Vercel, set it to `https://voidview.space` if you want absolute canonical URLs in metadata.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Notes / Disclaimer
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- VoidView is **not affiliated with NASA**.
+- Images and metadata come from public sources; credits belong to their respective owners.
+- For print monetization, always show attribution/credits and consider reviewing NASA/partner usage guidelines.
+
+---
+
+## Roadmap Ideas
+
+- Search (keyword + filters: portrait-friendly, ultrawide, 4K)
+- Favorites/collections + share links
+- “Weekly wallpaper pack” downloads + email list
+- Print-on-demand integration (Printful / Gelato / Printify)
+- Consent Mode v2 / CMP integration (for EU/UK ad compliance)
+
+---
+
+## License
+
+MIT
+
+```
+
+```

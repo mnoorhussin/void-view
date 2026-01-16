@@ -3,6 +3,7 @@ import "./globals.css";
 import { bodyFont } from "@/lib/fonts";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
+import CookieBanner from "@/components/CookieBanner";
 
 export const metadata: Metadata = {
   title: "VoidView.space",
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </main>
         <SiteFooter />
+        <CookieBanner />
       </body>
     </html>
   );

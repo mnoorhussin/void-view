@@ -128,16 +128,20 @@ export async function GET(req: Request) {
   if (!bestUrl) return NextResponse.json({ error: "No usable asset found" }, { status: 404 });
 
   try {
-    const input = await downloadBuffer(bestUrl);
-    const out = await renderWallpaper(input, w, h, mode);
+const input = await downloadBuffer(bestUrl);
+const out = await renderWallpaper(input, w, h, mode);
 
-    return new Response(out, {
-      headers: {
-        "Content-Type": "image/jpeg",
-        "Content-Disposition": `inline; filename="${nasa_id}_${w}x${h}_${mode}.jpg"`,
-        "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-      },
-    });
+const filename = `${nasa_id}_${w}x${h}_${mode}.jpg`;
+const body = new Uint8Array(out);
+
+return new Response(body, {
+  headers: {
+    "Content-Type": "image/jpeg",
+    "Content-Disposition": `attachment; filename="${filename}"`,
+    "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
+    "X-Content-Type-Options": "nosniff",
+  },
+});
   } catch (e: any) {
     return NextResponse.json(
       { error: "Wallpaper generation failed", details: String(e?.message ?? e), sourceUrl: bestUrl },
@@ -163,15 +167,18 @@ export async function POST(req: Request) {
   if (!bestUrl) return NextResponse.json({ error: "No usable asset found" }, { status: 404 });
 
   try {
-    const input = await downloadBuffer(bestUrl);
-    const out = await renderWallpaper(input, w, h, mode);
+const input = await downloadBuffer(bestUrl);
+const out = await renderWallpaper(input, w, h, mode);
 
-    return new Response(out, {
-      headers: {
-        "Content-Type": "image/jpeg",
-        "Cache-Control": "no-store",
-      },
-    });
+const body = new Uint8Array(out);
+
+return new Response(body, {
+  headers: {
+    "Content-Type": "image/jpeg",
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+  },
+});
   } catch (e: any) {
     return NextResponse.json(
       { error: "Wallpaper generation failed", details: String(e?.message ?? e), sourceUrl: bestUrl },

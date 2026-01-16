@@ -1,4 +1,34 @@
 import "server-only";
+import { headers } from "next/headers";
+
+export type FeedResponse = {
+  cat: string;
+  label: string;
+  query: string;
+  page: number;
+  perPage: number;
+  totalHits: number | null;
+  totalPages: number | null;
+  items: FeaturedItem[];
+};
+
+async function getOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? (host.includes("localhost") ? "http" : "https");
+  return `${proto}://${host}`;
+}
+
+export async function getFeed(cat: string, page: number): Promise<FeedResponse | null> {
+  const origin = await getOrigin();
+  const url = new URL("/api/feed", origin);
+  url.searchParams.set("cat", cat);
+  url.searchParams.set("page", String(page));
+
+  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
+  if (!res.ok) return null;
+  return (await res.json()) as FeedResponse;
+}
 
 export type FeaturedItem = {
   nasa_id: string;
@@ -35,12 +65,12 @@ function getBaseUrl() {
   return "http://localhost:3000";
 }
 
-export async function getFeatured(): Promise<FeaturedResponse | null> {
+export async function getFeatured(cat?: string): Promise<FeaturedResponse | null> {
   const base = getBaseUrl();
-  const res = await fetch(new URL("/api/featured", base).toString(), {
-    next: { revalidate: 3600 },
-  });
+  const url = new URL("/api/featured", base);
+  if (cat) url.searchParams.set("cat", cat);
 
+  const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
   if (!res.ok) return null;
   return (await res.json()) as FeaturedResponse;
 }
