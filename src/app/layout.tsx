@@ -8,9 +8,16 @@ import CookieBanner from "@/components/CookieBanner";
 export const metadata: Metadata = {
   title: "VoidView.space",
   description: "Curated space images + fit-to-device wallpapers.",
+  other: {
+    "google-adsense-account": "ca-pub-7422433849281769",
+  },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={bodyFont.className}>
       <body className="min-h-screen">
