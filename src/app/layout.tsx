@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { bodyFont } from "@/lib/fonts";
 import SiteHeader from "../components/SiteHeader";
@@ -21,6 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={bodyFont.className}>
       <body className="min-h-screen">
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7422433849281769"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <SiteHeader />
         <main className="mx-auto w-full max-w-6xl px-4 py-10 md:px-6">
           {children}
